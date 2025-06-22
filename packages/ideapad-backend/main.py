@@ -19,7 +19,7 @@ async def root():
     return {"message": "Welcome to the Ideapad Backend!"}
 
 
-#a POST /chat handler and wire it to a stub model class in llama_runner.py.
+#A POST /chat handler and wire it to a stub model class in llama_runner.py.
 
 @app.post("/api/chat")
 async def chat_handler(prompt: str):
