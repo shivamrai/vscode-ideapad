@@ -30,7 +30,8 @@ vscode-ideapad/
 └── README.md
 ```
 For backend testing run 
-```(vscode-ideapad) ➜  ideapad-backend git:(main) ✗ uvicorn main:app --reload
+```
+(vscode-ideapad) ➜  ideapad-backend git:(main) ✗ uvicorn main:app --reload
 INFO:     Will watch for changes in these directories: ['/Volumes/Dock SSD/vscode-ideapad/packages/ideapad-backend']
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 INFO:     Started reloader process [31202] using StatReload
