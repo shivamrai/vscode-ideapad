@@ -4,6 +4,10 @@
 # VSCode settings
 .vscode/
 
+# Pipenv and virtual environments
+Pipfile.lock
+*.venv
+
 # Node.js dependencies
 node_modules/
 **/node_modules/
