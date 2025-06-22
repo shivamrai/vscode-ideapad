@@ -10,11 +10,14 @@ with open(CONFIG_PATH) as f:
     config = json.load(f)
 
 MODEL_PATH = config["model_path"]
+MODEL_N_CTX = config.get("n_ctx", 512)  # Default to 512 if not specified
+MODEL_MAX_TOKENS = config.get("model_tokens", 4096)  # Default to 4096 if not specified
+MODEL_TEMPERATURE = config.get("temperature", 0.7)  # Default to 0.7 if not specified
 
 router = APIRouter()
 
 # Temporary runner; in production use DI or singleton
-runner = LlamaRunner(model_path=MODEL_PATH)
+runner = LlamaRunner(config)
 
 @router.get("/health")
 async def health_check():
