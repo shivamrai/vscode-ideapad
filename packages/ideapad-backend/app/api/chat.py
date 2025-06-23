@@ -1,5 +1,3 @@
-# app/api/chat.py
-
 from fastapi import APIRouter, HTTPException
 from pathlib import Path
 import json
@@ -11,6 +9,7 @@ from app.schemas import (
     ContinueConversationResponse,
     EndConversationRequest,
     EndConversationResponse,
+    ChangeModelRequest,
 )
 from app.exceptions import ModelLoadError, ModelInferenceError, to_http_exception
 from app.types import ModelErrorDetailEnum
@@ -73,16 +72,28 @@ async def end_conversation(req: EndConversationRequest):
     """
     End a conversation, freeing resources.
     """
-    runner = _sessions.pop(req.conversation_id, None)
+    conversation_id: str = req.conversation_id
+    runner = _sessions.pop(conversation_id, None)
     if not runner:
         raise to_http_exception(ModelInferenceError(detail=ModelErrorDetailEnum.CONVERSATION_NOT_FOUND_ERROR))
     runner.stop_model()
     return {"status": "ended"}
 
-@router.post("/change_model")
-async def change_model(model_path: str):
+async def change_model(req: ChangeModelRequest):
     """
-    Change the default model for new conversations.
+    Change the model for an existing conversation.
     """
-    config["model_path"] = model_path
-    return {"status": "model path updated", "model_path": model_path}
+    conversation_id: str = req.conversation_id
+    runner = _sessions.pop(conversation_id, None)
+    if not runner:
+        raise to_http_exception(ModelInferenceError(detail=ModelErrorDetailEnum.CONVERSATION_NOT_FOUND_ERROR))
+        return "No active converstation"
+    else:
+        runner.stop_model()
+        runner.config["model_path"] = req.model_path
+        runner.start_model()
+        if not hasattr(runner, "model_instance") or runner.model_instance is None:
+            raise to_http_exception(ModelLoadError(detail=ModelErrorDetailEnum.MODEL_INITIALIZATION_ERROR))
+        new_cid = runner.model_instance.get_conversation_id()
+        _sessions[new_cid] = runner
+        return {"conversation_id": new_cid, "status": "model changed"}

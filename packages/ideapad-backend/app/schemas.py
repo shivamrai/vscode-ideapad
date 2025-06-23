@@ -19,3 +19,11 @@ class EndConversationRequest(BaseModel):
 
 class EndConversationResponse(BaseModel):
     status: str
+
+class ChangeModelRequest(BaseModel):
+    conversation_id: str
+    model_path: str
+
+class ChangeModelResponse(BaseModel):
+    conversation_id: str
+    status: str
