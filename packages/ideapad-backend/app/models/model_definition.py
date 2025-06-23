@@ -1,3 +1,4 @@
+from pathlib import Path
 from llama_cpp import Llama
 from app.types import ModelConfig
 
@@ -7,10 +8,21 @@ class ModelDefinition:
     """
 
     def __init__(self, config: ModelConfig):
-        self.model_path: str = config.get("model_path", "models/default.gguf")
         self.n_ctx: int = config.get("n_ctx", 2048)
         self.max_tokens: int = config.get("model_tokens", 512)
         self.temperature: float = config.get("temperature", 0.7)
+
+        raw_path = config.get("model_path", "models/default.gguf")
+        candidate = Path(raw_path)
+        # Resolve relative paths against project root
+        if not candidate.is_absolute():
+            project_root = Path(__file__).resolve().parents[4]
+            candidate = (project_root / raw_path).expanduser()
+        else:
+            candidate = candidate.expanduser()
+        if not candidate.exists():
+            raise RuntimeError(f"Model path does not exist: {candidate}")
+        self.model_path = str(candidate)
 
         try:
             self.model: Llama = Llama(model_path=self.model_path, n_ctx=self.n_ctx)

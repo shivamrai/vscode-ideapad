@@ -11,9 +11,9 @@ from app.schemas import (
     EndConversationResponse,
     ChangeModelRequest,
 )
-from app.exceptions import ModelLoadError, to_http_exception
+from app.exceptions import ModelLoadError, ModelInferenceError, to_http_exception
 from app.types import ModelErrorDetailEnum
-from app.api.session_manager import add_runner, get_runner_or_404, pop_runner_or_404
+from app.api.session_manager import add_runner, pop_runner_or_404
 
 # Load config
 CONFIG_PATH = Path(__file__).resolve().parents[2] / "model_config.json"
@@ -21,6 +21,9 @@ with open(CONFIG_PATH) as f:
     config = json.load(f)
 
 router = APIRouter()
+
+# In-memory session store: conversation_id -> ModelRunner
+_sessions: dict[str, ModelRunner] = {}
 
 @router.get("/health")
 async def health_check():
@@ -48,7 +51,7 @@ async def start_conversation():
     if not hasattr(runner, "model_instance") or runner.model_instance is None:
         raise to_http_exception(ModelLoadError(detail=ModelErrorDetailEnum.MODEL_INITIALIZATION_ERROR))
     cid = runner.model_instance.get_conversation_id()
-    add_runner(cid, runner)
+    _sessions[cid] = runner
     return {"conversation_id": cid}
 
 @router.post("/continue_conversation", response_model=ContinueConversationResponse)
@@ -56,7 +59,9 @@ async def continue_conversation(req: ContinueConversationRequest):
     """
     Continue an existing conversation by its ID.
     """
-    runner = get_runner_or_404(req.conversation_id)
+    runner = _sessions.get(req.conversation_id)
+    if not runner:
+        raise to_http_exception(ModelInferenceError(detail=ModelErrorDetailEnum.CONVERSATION_NOT_FOUND_ERROR))
     try:
         response = runner.get_response(req.prompt)
         return {"response": response}
@@ -68,7 +73,9 @@ async def end_conversation(req: EndConversationRequest):
     """
     End a conversation, freeing resources.
     """
-    runner = pop_runner_or_404(req.conversation_id)
+    runner = _sessions.pop(req.conversation_id, None)
+    if not runner:
+        raise to_http_exception(ModelInferenceError(detail=ModelErrorDetailEnum.CONVERSATION_NOT_FOUND_ERROR))
     runner.stop_model()
     return {"status": "ended"}
 
