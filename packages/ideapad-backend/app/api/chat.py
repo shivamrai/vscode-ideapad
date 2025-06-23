@@ -79,6 +79,7 @@ async def end_conversation(req: EndConversationRequest):
     runner.stop_model()
     return {"status": "ended"}
 
+@router.post("/change_model", response_model=ChangeModelRequest)
 async def change_model(req: ChangeModelRequest):
     """
     Change the model for an existing conversation.
