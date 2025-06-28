@@ -17,10 +17,17 @@ class ModelInstance:
         self.config = config
         self.model = ModelDefinition(config)
         self.run_warm_up()
+        self.history: list[dict[str, str]] = []
 
     def get_response(self, prompt: str) -> str:
         try:
-            return self.model.generate_response(prompt)
+            # 1) append user turn
+            self.history.append({"role": "user", "content": prompt})
+            # 2) run inference via generate_response (which now uses chat API)
+            answer = self.model.generate_response(prompt)
+            # 3) append assistant turn
+            self.history.append({"role": "assistant", "content": answer})
+            return answer
         except Exception as e:
             raise to_http_exception(ModelInferenceError(ModelErrorDetailEnum.MODEL_INFERENCE_ERROR)) from e
 
@@ -47,6 +54,19 @@ class ModelInstance:
             self.model.close()
         except Exception as e:
             raise to_http_exception(ModelShutdownError(ModelErrorDetailEnum.MODEL_SHUTDOWN_ERROR)) from e
+        
+    def system_prompt(self) -> str:
+        """
+        Return the system prompt for the model.
+        This can be used to set the context or initial state of the model.
+        """
+        return "You are a helpful coding assistant."
+        
+    def __enter__(self):
+        """
+        Support context manager usage for automatic resource management.
+        """
+        return self
 
     def __del__(self):
         """
