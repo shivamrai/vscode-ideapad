@@ -1,17 +1,15 @@
 import uuid
 from app.models.model_definition import ModelDefinition
 from app.types import ModelConfig, ModelErrorDetailEnum
-from app.exceptions import (
-    ModelInferenceError,
-    ModelShutdownError,
-    to_http_exception
-)
+from app.exceptions import ModelInferenceError, ModelShutdownError, to_http_exception
+
 
 class ModelInstance:
     """
     Represents a persistent model session tied to a conversation, identified by a UUID.
     Handles session lifecycle, including warm-up and resource cleanup.
     """
+
     def __init__(self, config: ModelConfig):
         self.conversation_id = str(uuid.uuid4())
         self.config = config
@@ -29,7 +27,9 @@ class ModelInstance:
             self.history.append({"role": "assistant", "content": answer})
             return answer
         except Exception as e:
-            raise to_http_exception(ModelInferenceError(ModelErrorDetailEnum.MODEL_INFERENCE_ERROR)) from e
+            raise to_http_exception(
+                ModelInferenceError(ModelErrorDetailEnum.MODEL_INFERENCE_ERROR)
+            ) from e
 
     def run_warm_up(self):
         """
@@ -38,7 +38,9 @@ class ModelInstance:
         try:
             self.model.generate_response(prompt="Warm up")
         except Exception as e:
-            raise to_http_exception(ModelInferenceError(ModelErrorDetailEnum.MODEL_INFERENCE_ERROR)) from e
+            raise to_http_exception(
+                ModelInferenceError(ModelErrorDetailEnum.MODEL_INFERENCE_ERROR)
+            ) from e
 
     def get_conversation_id(self) -> str:
         """
@@ -53,15 +55,17 @@ class ModelInstance:
         try:
             self.model.close()
         except Exception as e:
-            raise to_http_exception(ModelShutdownError(ModelErrorDetailEnum.MODEL_SHUTDOWN_ERROR)) from e
-        
+            raise to_http_exception(
+                ModelShutdownError(ModelErrorDetailEnum.MODEL_SHUTDOWN_ERROR)
+            ) from e
+
     def system_prompt(self) -> str:
         """
         Return the system prompt for the model.
         This can be used to set the context or initial state of the model.
         """
         return "You are a helpful coding assistant."
-        
+
     def __enter__(self):
         """
         Support context manager usage for automatic resource management.

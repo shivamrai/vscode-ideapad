@@ -1,8 +1,9 @@
-""" Stateful runner that explicitly manages model lifecycle for inference calls """
+"""Stateful runner that explicitly manages model lifecycle for inference calls"""
 
 from app.types import ModelConfig
 from app.models.model_instance import ModelInstance
 from app.exceptions import ModelLoadError, to_http_exception
+
 
 class ModelRunner:
     def __init__(self, config: ModelConfig):
