@@ -39,3 +39,4 @@ Icon?
 *.log
 *.tmp
 models/*
+!models/.gitkeep
