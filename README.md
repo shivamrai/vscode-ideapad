@@ -39,3 +39,4 @@ Use the following to access backend paths
 ```http://localhost:8000/docs```
 
 Happy Hacking :)
+Download models for now from https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF in gguf format, star their project.
