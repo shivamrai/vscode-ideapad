@@ -20,14 +20,18 @@ class ModelDefinition:
         self.num_predict: int = getattr(config, "num_predict", 1)
 
         raw_path = getattr(config, "model_path", "models/default.gguf")
+        print("Loaded config:", config)
         candidate = Path(raw_path)
+        print("Resolved model path:", candidate)
+        # Always define project_root for later use
+        project_root = Path(__file__).resolve().parents[4]
         # Resolve relative paths against project root
         if not candidate.is_absolute():
-            project_root = Path(__file__).resolve().parents[4]
             candidate = (project_root / raw_path).expanduser()
         else:
             candidate = candidate.expanduser()
         if not candidate.exists():
+            print(f"Project root: {project_root}")
             raise RuntimeError(f"Model path does not exist: {candidate}")
         self.model_path = str(candidate)
 
