@@ -19,7 +19,8 @@ class ModelDefinition:
         self.num_threads: int = getattr(config, "num_threads", 4)
         self.num_predict: int = getattr(config, "num_predict", 1)
 
-        raw_path = getattr(config, "model_path", "models/default.gguf")
+        raw_path_str: str = config.model_path or "models/default.gguf"
+        raw_path = Path(raw_path_str)    
         print("Loaded config:", config)
         candidate = Path(raw_path)
         print("Resolved model path:", candidate)

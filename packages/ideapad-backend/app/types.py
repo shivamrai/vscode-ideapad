@@ -1,6 +1,5 @@
 from typing import List, TypedDict
 from enum import Enum
-from pathlib import Path
 
 from pydantic import BaseModel, Field
 
@@ -25,7 +24,8 @@ class ModelConfig(BaseModel):
         allow_population_by_field_name (bool): Allows population of fields by their name.
     """
 
-    model_path: Path = Field(description="Path to the .gguf model file")
+    model_path: str = Field("models/default.gguf", description="…")
+
     n_ctx: int = Field(2048, description="Maximum context size")
     max_tokens: int = Field(
         512, alias="model_tokens", description="Max tokens to generate"

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pathlib import Path
 import json
+from app.types import ModelConfig
 
 from app.models.model_runner import ModelRunner
 from app.schemas import (
@@ -18,7 +19,8 @@ from app.api.session_manager import add_runner, pop_runner_or_404
 # Load config
 CONFIG_PATH = Path(__file__).resolve().parents[2] / "model_config.json"
 with open(CONFIG_PATH) as f:
-    config = json.load(f)
+    raw = json.load(f)
+    config = ModelConfig.model_validate(raw)  # now a ModelConfig instance
 
 router = APIRouter()
 
@@ -102,7 +104,7 @@ async def change_model(req: ChangeModelRequest):
     """
     runner = pop_runner_or_404(req.conversation_id)
     runner.stop_model()
-    runner.config.model_path = Path(req.model_path)
+    runner.config.model_path = req.model_path
     runner.start_model()
     if not hasattr(runner, "model_instance") or runner.model_instance is None:
         raise to_http_exception(

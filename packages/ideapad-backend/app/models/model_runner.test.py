@@ -19,7 +19,7 @@ with tempfile.NamedTemporaryFile(delete=False) as tmp:
 class TestModelRunner(unittest.TestCase):
     def setUp(self):
         self.config = ModelConfig(
-            model_path=DUMMY_MODEL_PATH,
+            model_path=str(DUMMY_MODEL_PATH),
             n_ctx=2048,
             model_tokens=100,
             temperature=0.7,
