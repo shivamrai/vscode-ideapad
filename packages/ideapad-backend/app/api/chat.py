@@ -40,7 +40,7 @@ async def model_info() -> dict[str, str]:
     Returns the model path and other relevant details.
     """
     return {
-        "model_path": str(config["model_path"]),
+        "model_path": str(config.model_path),
         "description": "Llama model for inference",
         "version": "1.0.0",
     }
